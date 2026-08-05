@@ -5,13 +5,15 @@ using namespace std;
 
 int main()
 {
-    dsa::vector<int> ints;
+    dsa::vector<int> ints(1,2,3,4,5,6,7,8);
+    auto ints_copy = std::move(ints);
 
-    for ( int i = 0; i < 100; ++i)
-        ints.push_back(i);
+    while (! ints_copy.empty())
+        cout << ints_copy.pop_front() << ' ';
 
-    for (int i = 0; i < 100; ++i)
-        cout << ints[i] << ' ';
+    cout << "\n";
+    while (! ints.empty())
+        cout << ints.pop_front() << ' ';
 
     cout << "\n\n";
     return 0;
