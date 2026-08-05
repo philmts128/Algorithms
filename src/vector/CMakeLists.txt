@@ -1,4 +1,5 @@
 add_library(vector INTERFACE vector.hpp)
+add_library(vector_iterator INTERFACE vector_iterator.hpp)
 
 target_include_directories(vector INTERFACE ${PROJECT_SOURCE_DIR}/src)
 

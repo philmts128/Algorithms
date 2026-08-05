@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <cassert>
+#include "vector_iterator.hpp"
 
 
 namespace dsa
@@ -116,6 +117,15 @@ namespace dsa
         }
 
         /*---------------------------------------*/
+        auto remove(size_t index) -> T
+        {
+            auto item = index;
+            this->shift_left(index);
+            m_size -= 1;
+            return item;
+        }
+
+        /*---------------------------------------*/
         auto length() const -> size_t { return m_size; }
         auto empty() const -> bool    { return m_size == 0; }
 
@@ -123,6 +133,16 @@ namespace dsa
         auto at(size_t idx) const -> T{
             assert(idx >= 0 && idx < m_size);
             return m_data[idx];
+        }
+
+        /*---------------------------------------*/
+        auto begin() -> dsa::vector_iterator<T> {
+            return { &m_data[0] };
+        }
+
+        /*---------------------------------------*/
+        auto end() -> dsa::vector_iterator<T> {
+            return { &m_data[m_size-1] };
         }
 
         /*---------------------------------------*/
