@@ -172,12 +172,12 @@ namespace dsa
         }
 
         /*---------------------------------------*/
-        auto begin() -> dsa::vector_iterator<T> {
+        auto begin() const -> dsa::vector_iterator<T> {
             return { &m_data[0] };
         }
 
         /*---------------------------------------*/
-        auto end() -> dsa::vector_iterator<T> {
+        auto end() const -> dsa::vector_iterator<T> {
             return { &m_data[m_size] };
         }
 

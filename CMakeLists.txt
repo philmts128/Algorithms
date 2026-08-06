@@ -7,3 +7,5 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(src/recursion)
 add_subdirectory(src/vector)
+add_subdirectory(src/linked_list)
+add_subdirectory(src/memory)
