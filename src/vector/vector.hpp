@@ -20,8 +20,8 @@ namespace dsa
 
     public:
         /*---------------------------------------*/
-        vector() {
-            m_data = new T[m_capacity];
+        vector(size_t blocks = 1) {
+            m_data = new T[Block_Size];
         }
 
         /*---------------------------------------*/
@@ -67,7 +67,7 @@ namespace dsa
         void push_back(const T& item)
         {
             if (m_size == m_capacity) {
-                size_t new_cap = this->next_multiple(m_size, Block_Size);
+                size_t new_cap = this->next_multiple(m_size);
                 this->grow(new_cap); }
 
             m_data[m_size++] = item;
@@ -77,7 +77,7 @@ namespace dsa
         void push_front(const T& item)
         {
             if (m_size == m_capacity) {
-                size_t new_cap = this->next_multiple(m_size, Block_Size);
+                size_t new_cap = this->next_multiple(m_size);
                 this->grow(new_cap); }
 
             this->shift_right();
@@ -103,6 +103,8 @@ namespace dsa
         auto pop_back() -> T
         {
             assert(m_size > 0);
+            if (m_size <= m_capacity/2)
+                this->shrink(this->next_multiple(m_size));
             return m_data[(m_size--) - 1];
         }
 
@@ -110,6 +112,8 @@ namespace dsa
         auto pop_front() -> T
         {
             assert(m_size > 0);
+            if (m_size <= m_capacity/2)
+                this->shrink(this->next_multiple(m_size));
             auto item = m_data[0];
             this->shift_left();
             m_size -= 1;
@@ -119,6 +123,9 @@ namespace dsa
         /*---------------------------------------*/
         auto remove(size_t index) -> T
         {
+            assert(index >= 0 && index < m_size);
+            if (m_size <= m_capacity/2)
+                this->shrink(this->next_multiple(m_size));
             auto item = index;
             this->shift_left(index);
             m_size -= 1;
@@ -126,13 +133,42 @@ namespace dsa
         }
 
         /*---------------------------------------*/
+        auto find(const T& item) -> size_t
+        {
+            for (size_t i = 0; i < m_size; ++i) {
+                if (item == m_data[i]) {
+                    return i;
+                }
+            }
+            return -1; //valor máximo de size_t
+        }
+
+        /*---------------------------------------*/
+        inline auto exists(const T& item) -> bool {
+            return (this->find(item) != -1);
+        }
+
+        /*---------------------------------------*/
         auto length() const -> size_t { return m_size; }
         auto empty() const -> bool    { return m_size == 0; }
+        auto capacity() const -> size_t { return m_capacity; }
 
         /*---------------------------------------*/
         auto at(size_t idx) const -> T{
             assert(idx >= 0 && idx < m_size);
             return m_data[idx];
+        }
+
+        /*---------------------------------------*/
+        auto first() -> T {
+            assert(m_size > 0);
+            return m_data[0];
+        }
+
+        /*---------------------------------------*/
+        auto last() -> T {
+            assert(m_size > 0);
+            return m_data[m_size-1];
         }
 
         /*---------------------------------------*/
@@ -142,7 +178,7 @@ namespace dsa
 
         /*---------------------------------------*/
         auto end() -> dsa::vector_iterator<T> {
-            return { &m_data[m_size-1] };
+            return { &m_data[m_size] };
         }
 
         /*---------------------------------------*/
@@ -162,7 +198,6 @@ namespace dsa
         /*---------------------------------------*/
         void grow(const size_t size)
         {
-            assert(size > m_size);
             auto data = new T[size];
             for (size_t i = 0; i < m_size; ++i)
                 data[i] = m_data[i];
@@ -172,22 +207,33 @@ namespace dsa
         }
 
         /*---------------------------------------*/
-        void shift_right(size_t start = 0)
+        void shrink(const size_t size)
+        {
+            auto data = new T[size];
+            for (size_t i = 0; i < size; ++i)
+                data[i] = m_data[i];
+            delete[] m_data;
+            m_data = data;
+            m_capacity = size;
+        }
+
+        /*---------------------------------------*/
+        inline void shift_right(size_t start = 0)
         {
             for (size_t i = m_size; i >= start+1; --i)
                 m_data[i] = m_data[i-1];
         }
 
         /*---------------------------------------*/
-        void shift_left(size_t start = 0)
+        inline void shift_left(size_t start = 0)
         {
             for (size_t i = start+1; i < m_size; ++i)
                 m_data[i-1] = m_data[i];
         }
 
         /*---------------------------------------*/
-        auto next_multiple(size_t num, size_t mul) -> size_t {
-            return num - (num % mul) + mul;
+        inline auto next_multiple(size_t num) -> size_t {
+            return num - (num % Block_Size) + Block_Size;
         }
 
         /*---------------------------------------*/
