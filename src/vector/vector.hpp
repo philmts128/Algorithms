@@ -17,7 +17,7 @@ namespace dsa
         T* m_data { nullptr };
         size_t m_size { 0 };
         size_t m_capacity { Block_Size };
-        static constexpr int Block_Size { 64 };
+        static constexpr int Block_Size { 256 };
 
     public:
         /*---------------------------------------*/
