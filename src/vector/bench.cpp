@@ -14,19 +14,22 @@ int main()
 
     dsa::stopwatch sw;
 
-    sw.measure(5, [&]() {
-        for (int i = 0; i < 10'000; ++i)
+    sw.measure(10, [&]() {
+        for (int i = 0; i < 50'000; ++i)
             v1.push_back(i);
+        //v1.clear();
+
     });
+    v1.clear();
+    cout << "push_back O(1): " << sw.get_result() << "\n";
 
-    cout << "push_back (1): " << sw.get_result() << "\n";
-
-    sw.measure(5, [&]() {
-        for (int i = 0; i < 10'000; ++i)
-            v1.push_front(i);
+    sw.measure(10, [&]() {
+        for (int i = 0; i < 50'000; ++i)
+            v2.push_front(i);
+        //v2.clear();
     });
-
-    cout << "push_front (n): " << sw.get_result() << "\n";
+    v2.clear();
+    cout << "push_front O(n): " << sw.get_result() << "\n";
 
     cout << "\n\n";
     return 0;

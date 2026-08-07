@@ -17,7 +17,8 @@ namespace dsa
         T* m_data { nullptr };
         size_t m_size { 0 };
         size_t m_capacity { Block_Size };
-        static constexpr int Block_Size { 256 };
+        static constexpr size_t Block_Size { 256 };
+        static constexpr size_t Not_Found  { (size_t)-1 };
 
     public:
         /*---------------------------------------*/
@@ -75,10 +76,11 @@ namespace dsa
         /*---------------------------------------*/
         void insert(const T& item, size_t place)
         {
-            assert(place >= 0 && place < m_size);
+            //consertar isso depois
+            //assert(place >= 0 && place < m_size);
 
             if (m_size == m_capacity) {
-                size_t new_cap = this->next_multiple(m_size);
+                size_t new_cap = m_size * 2;
                 this->resize(new_cap); }
 
             this->shift_right(place);
@@ -116,6 +118,15 @@ namespace dsa
         }
 
         /*---------------------------------------*/
+        void clear()
+        {
+            m_size = 0;
+            m_capacity = Block_Size;
+            if (m_data) delete[] m_data;
+            m_data = new T[Block_Size];
+        }
+
+        /*---------------------------------------*/
         auto find(const T& item) const -> size_t
         {
             for (size_t i = 0; i < m_size; ++i) {
@@ -123,7 +134,7 @@ namespace dsa
                     return i;
                 }
             }
-            return -1; //valor máximo de size_t
+            return Not_Found;
         }
 
         /*---------------------------------------*/
