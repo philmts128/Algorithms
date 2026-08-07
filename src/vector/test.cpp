@@ -54,7 +54,8 @@ void test_str()
     print("fruits b", fruits_b);
     print("fruits a", fruits_a);
 
-    auto fruits_c = std::move(fruits_b);
+    dsa::vector<string> fruits_c;
+    fruits_c = std::move(fruits_b);
     fruits_b.push_back("banana");
     fruits_b.push_front("strawberry");
     fruits_b.insert("orange", 1);

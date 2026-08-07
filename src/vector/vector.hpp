@@ -194,6 +194,22 @@ namespace dsa
             return *this;
         }
 
+        /*---------------------------------------*/
+        auto operator=(dsa::vector<T>&& other) -> dsa::vector<T>
+        {
+            if (m_data) delete[] m_data;
+
+            m_data = other.m_data;
+            m_size = other.m_size;
+            m_capacity = other.m_capacity;
+
+            other.m_data = new T[Block_Size];
+            other.m_size = 0;
+            other.m_capacity = Block_Size;
+
+            return *this;
+        }
+
     private:
         /*---------------------------------------*/
         void grow(const size_t size)
