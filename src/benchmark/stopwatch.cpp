@@ -4,29 +4,29 @@
 #include <cmath>
 
 
-namespace pm
+namespace dsa
 {
     /*---------------------------*/
-    timer::timer()
+    stopwatch::stopwatch()
     {
 
     }
 
     /*---------------------------*/
-    void timer::start()
+    void stopwatch::start()
     {
         m_start_point = pm_timer::now();
     }
 
     /*---------------------------*/
-    void timer::stop()
+    void stopwatch::stop()
     {
         auto end_point = pm_timer::now();
         m_result_milli = std::chrono::duration_cast<pm_milli>(end_point - m_start_point);
     }
 
     /*---------------------------*/
-    std::string timer::get_result()
+    std::string stopwatch::get_result()
     {
         auto millis = m_result_milli.count();
 
@@ -47,7 +47,7 @@ namespace pm
     }
 
     /*---------------------------*/
-    pm_milli timer::median(const std::multiset<pm_milli>& times)
+    pm_milli stopwatch::median(const std::multiset<pm_milli>& times)
     {
         size_t len = times.size();
 

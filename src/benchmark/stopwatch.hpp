@@ -7,12 +7,12 @@ using pm_timer = std::chrono::system_clock;
 using pm_milli = std::chrono::milliseconds;
 
 
-namespace pm
+namespace dsa
 {
-    class timer final
+    class stopwatch final
     {
     public:
-        timer();
+        stopwatch();
 
     public:
         void start();
