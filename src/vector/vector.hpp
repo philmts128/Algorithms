@@ -68,15 +68,8 @@ namespace dsa
         }
 
         /*---------------------------------------*/
-        void push_front(const T& item)
-        {
-            if (m_size == m_capacity) {
-                size_t new_cap = this->next_multiple(m_size);
-                this->grow(new_cap); }
-
-            this->shift_right();
-            m_data[0] = item;
-            m_size += 1;
+        void push_front(const T& item) {
+            this->insert(item, 0);
         }
 
         /*---------------------------------------*/
@@ -103,15 +96,9 @@ namespace dsa
         }
 
         /*---------------------------------------*/
-        auto pop_front() -> T
-        {
+        auto pop_front() -> T {
             assert(m_size > 0);
-            if (m_size <= m_capacity/2)
-                this->shrink(this->next_multiple(m_size));
-            auto item = m_data[0];
-            this->shift_left();
-            m_size -= 1;
-            return item;
+            return remove(0);
         }
 
         /*---------------------------------------*/
@@ -202,6 +189,18 @@ namespace dsa
         {
             auto data = new T[size];
             for (size_t i = 0; i < m_size; ++i)
+                data[i] = m_data[i];
+            delete[] m_data;
+            m_data = data;
+            m_capacity = size;
+        }
+
+        /*---------------------------------------*/
+        void resize(const size_t size)
+        {
+            auto data = new T[size];
+            auto lim = (size < m_size) ? size : m_size;
+            for (size_t i = 0; i < lim; ++i)
                 data[i] = m_data[i];
             delete[] m_data;
             m_data = data;
