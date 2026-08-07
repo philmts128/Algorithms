@@ -48,7 +48,7 @@ namespace dsa
         vector(Args... items)
         {
             m_size = sizeof...(items);
-            m_capacity = this->next_multiple(m_size, Block_Size);
+            m_capacity = this->next_multiple(m_size);
             if (m_data)
                 delete[] m_data;
             m_data = new T[m_capacity] { static_cast<T>(items)... };
@@ -91,7 +91,7 @@ namespace dsa
             assert(place >= 0 && place < m_size);
 
             if (m_size == m_capacity) {
-                size_t new_cap = this->next_multiple(m_size, Block_Size);
+                size_t new_cap = this->next_multiple(m_size);
                 this->grow(new_cap); }
 
             this->shift_right(place);
@@ -126,14 +126,14 @@ namespace dsa
             assert(index >= 0 && index < m_size);
             if (m_size <= m_capacity/2)
                 this->shrink(this->next_multiple(m_size));
-            auto item = index;
+            auto item = m_data[index];
             this->shift_left(index);
             m_size -= 1;
             return item;
         }
 
         /*---------------------------------------*/
-        auto find(const T& item) -> size_t
+        auto find(const T& item) const -> size_t
         {
             for (size_t i = 0; i < m_size; ++i) {
                 if (item == m_data[i]) {
@@ -144,7 +144,7 @@ namespace dsa
         }
 
         /*---------------------------------------*/
-        inline auto exists(const T& item) -> bool {
+        auto exists(const T& item) const -> bool {
             return (this->find(item) != -1);
         }
 
