@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <cassert>
+#include <utility>
 #include "vector_iterator.hpp"
 
 
@@ -32,15 +33,8 @@ namespace dsa
         /*---------------------------------------*/
         vector(dsa::vector<T>&& other)
         {
-            if (m_data) delete[] m_data;
-
-            m_data = other.m_data;
-            m_size = other.m_size;
-            m_capacity = other.m_capacity;
-
-            other.m_data = new T[Block_Size];
-            other.m_size = 0;
-            other.m_capacity = Block_Size;
+            this->move_data(
+                std::forward<dsa::vector<T>&&>(other));
         }
 
         /*---------------------------------------*/
@@ -197,16 +191,8 @@ namespace dsa
         /*---------------------------------------*/
         auto operator=(dsa::vector<T>&& other) -> dsa::vector<T>
         {
-            if (m_data) delete[] m_data;
-
-            m_data = other.m_data;
-            m_size = other.m_size;
-            m_capacity = other.m_capacity;
-
-            other.m_data = new T[Block_Size];
-            other.m_size = 0;
-            other.m_capacity = Block_Size;
-
+            this->move_data(
+                std::forward<dsa::vector<T>&&>(other));
             return *this;
         }
 
@@ -262,6 +248,20 @@ namespace dsa
             m_size = other.m_size;
             for (size_t i = 0; i < m_size; ++i)
                 m_data[i] = other.m_data[i];
+        }
+
+        /*---------------------------------------*/
+        void move_data(dsa::vector<T>&& other)
+        {
+            if (m_data) delete[] m_data;
+
+            m_data = other.m_data;
+            m_size = other.m_size;
+            m_capacity = other.m_capacity;
+
+            other.m_data = new T[Block_Size];
+            other.m_size = 0;
+            other.m_capacity = Block_Size;
         }
     };
 }
