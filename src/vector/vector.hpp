@@ -62,7 +62,7 @@ namespace dsa
         {
             if (m_size == m_capacity) {
                 size_t new_cap = this->next_multiple(m_size);
-                this->grow(new_cap); }
+                this->resize(new_cap); }
 
             m_data[m_size++] = item;
         }
@@ -79,7 +79,7 @@ namespace dsa
 
             if (m_size == m_capacity) {
                 size_t new_cap = this->next_multiple(m_size);
-                this->grow(new_cap); }
+                this->resize(new_cap); }
 
             this->shift_right(place);
             m_data[place] = item;
@@ -90,8 +90,10 @@ namespace dsa
         auto pop_back() -> T
         {
             assert(m_size > 0);
+            //ele encolhe a capacidade do buffer se a diferença para a quantidade
+            //de  elementos for de 50% ou mais
             if (m_size <= m_capacity/2)
-                this->shrink(this->next_multiple(m_size));
+                this->resize(this->next_multiple(m_size));
             return m_data[(m_size--) - 1];
         }
 
@@ -105,8 +107,8 @@ namespace dsa
         auto remove(size_t index) -> T
         {
             assert(index >= 0 && index < m_size);
-            if (m_size <= m_capacity/2)
-                this->shrink(this->next_multiple(m_size));
+            if (m_size <= m_capacity/2) //mesma coisa que em pop_back
+                this->resize(this->next_multiple(m_size));
             auto item = m_data[index];
             this->shift_left(index);
             m_size -= 1;
@@ -185,33 +187,12 @@ namespace dsa
 
     private:
         /*---------------------------------------*/
-        void grow(const size_t size)
-        {
-            auto data = new T[size];
-            for (size_t i = 0; i < m_size; ++i)
-                data[i] = m_data[i];
-            delete[] m_data;
-            m_data = data;
-            m_capacity = size;
-        }
-
-        /*---------------------------------------*/
         void resize(const size_t size)
         {
+            /* se o buffer encolher, o limite é size, se crescer, o limite é m_size*/
             auto data = new T[size];
             auto lim = (size < m_size) ? size : m_size;
             for (size_t i = 0; i < lim; ++i)
-                data[i] = m_data[i];
-            delete[] m_data;
-            m_data = data;
-            m_capacity = size;
-        }
-
-        /*---------------------------------------*/
-        void shrink(const size_t size)
-        {
-            auto data = new T[size];
-            for (size_t i = 0; i < size; ++i)
                 data[i] = m_data[i];
             delete[] m_data;
             m_data = data;
