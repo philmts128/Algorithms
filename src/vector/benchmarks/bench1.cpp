@@ -3,7 +3,7 @@
 using namespace std;
 
 #include "benchmark/stopwatch.hpp"
-#include "vector.hpp"
+#include "vector/vector.hpp"
 
 int main()
 {
