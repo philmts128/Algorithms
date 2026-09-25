@@ -14,7 +14,11 @@ int main()
     langs.insert("Java");
     langs.insert("C#");
 
-    langs.print();
+    cout << "min: " << langs.min() << "\n";
+    cout << "max: " << langs.max() << "\n\n";
+
+    langs.remove("Python");
+    langs.print('\n');
 
     cout << "\n\n";
     return 0;

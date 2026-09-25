@@ -1,8 +1,15 @@
+/**
+ * Exemplo de implementação árvore binária de busca simples e semitens duplicados.
+ * Operações: inserir, deletar, buscar, buscar máximo/mínimo e atravessar.
+ * Autor: Philippe Matias
+ */
+
 #pragma once
 
 #include "binary_tree_node.hpp"
 
 #include <cstdint>
+#include <cassert>
 #include <utility>
 #include <iostream>
 
@@ -19,27 +26,31 @@ namespace dsa
 
     public:
         /*----------------------------------*/
-        explicit binary_tree() {}
+        explicit binary_tree() {} //O(1)
 
         /*----------------------------------*/
-        explicit binary_tree(const binary_tree<T>& other) {
+        explicit binary_tree(const binary_tree<T>& other) { //O(n)
             this->copy_data(other);
         }
 
         /*----------------------------------*/
-        explicit binary_tree(binary_tree<T>&& other) {
+        explicit binary_tree(binary_tree<T>&& other) { //O(1)
             this->move_data(std::forward<binary_tree<T>>(other));
         }
 
         /*----------------------------------*/
-        ~binary_tree() {
+        ~binary_tree() { //O(n)
             this->clear();
         }
 
         /*----------------------------------*/
-        void insert(const T& item)
+        auto length() const -> size_t { return m_size; } //O(1)
+        auto empty()  const -> bool   { return m_size == 0; } //O(1)
+
+        /*----------------------------------*/
+        void insert(const T& item) //O(log(n)) no caso médio e O(n) no pior caso
         {
-            this->create_node(item);
+            this->create_root(item);
 
             auto it = m_root;
             while (true)
@@ -63,7 +74,103 @@ namespace dsa
         }
 
         /*----------------------------------*/
-        void clear()
+        bool remove(const T& item) //O(log(n)) no caso médio e O(n) no pior caso
+        {
+            assert(! this->empty());
+
+            auto* cur = m_root;
+            auto* parent = m_root;
+            bool is_left_child = true;
+
+            //procura pelo nó com o valor que queremos excluir
+            while (cur->data != item)
+            {
+                parent = cur;
+                if (item < cur->data) {
+                    is_left_child = true;
+                    cur = cur->left;
+                } else {
+                    is_left_child = false;
+                    cur = cur->right;
+                }
+
+                if (cur == nullptr) {
+                    return false;
+                }
+            }
+
+            if (cur->left == nullptr && cur->right == nullptr)
+            {
+                if (cur == m_root) {
+                    m_root = nullptr;
+                } else if (is_left_child) {
+                    parent->left = nullptr;
+                } else {
+                    parent->right = nullptr;
+                }
+            }
+            else if (cur->right == nullptr)
+            {
+                if (cur == m_root) {
+                    m_root = cur->left;
+                } else if (is_left_child) {
+                    parent->left = cur->left;
+                } else {
+                    parent->right = cur->left;
+                }
+            }
+            else if (cur->left == nullptr)
+            {
+                if (cur == m_root) {
+                    m_root = cur->right;
+                } else if (is_left_child) {
+                    parent->left = cur->right;
+                } else {
+                    parent->right = cur->right;
+                }
+            }
+            else
+            {
+                auto* successor = this->get_successor(cur);
+
+                if (cur == m_root) {
+                    m_root = successor;
+                } else if (is_left_child) {
+                    parent->left = successor;
+                } else {
+                    parent->right = successor;
+                }
+            }
+
+            return true;
+        }
+
+        /*----------------------------------*/
+        auto min() -> const T& //O(log(n)) no caso médio e O(n) no pior caso
+        {
+            assert(m_root != nullptr);
+
+            auto it = m_root;
+            while (it->left != nullptr)
+                it = it->left;
+
+            return it->data;
+        }
+
+        /*----------------------------------*/
+        auto max() -> const T& //O(log(n)) no caso médio e O(n) no pior caso
+        {
+            assert(m_root != nullptr);
+
+            auto it = m_root;
+            while (it->right != nullptr)
+                it = it->right;
+
+            return it->data;
+        }
+
+        /*----------------------------------*/
+        void clear() //O(n)
         {
             if (m_root)
             {
@@ -77,22 +184,37 @@ namespace dsa
         }
 
         /*----------------------------------*/
-        void print()
+        void print(char sep = ' ') //O(n)
         {
-            in_order(m_root, [](binary_tree_node<T>* n) {
-                std::cout << n->data << ' ';
+            this->traverse([&](const T& i) {
+                std::cout << i << sep;
             });
         }
 
         /*----------------------------------*/
-        auto operator = (const binary_tree<T>& other) -> const binary_tree<T>&
+        template <typename F, int Order = 1>
+        void traverse(F lambda) //O(n)
+        {
+            auto f = [&](binary_tree_node<T>* node) { lambda(node->data); };
+
+            if constexpr (Order == 1) {
+                this->in_order(m_root, f);
+            } else if (Order == 2) {
+                this->pre_order(m_root, f);
+            } else {
+                this->post_order(m_root, f);
+            }
+        }
+
+        /*----------------------------------*/
+        auto operator = (const binary_tree<T>& other) -> const binary_tree<T>& //O(n)
         {
             this->copy_data(other);
             return *this;
         }
 
         /*----------------------------------*/
-        auto operator = (binary_tree<T>&& other) -> binary_tree<T>&
+        auto operator = (binary_tree<T>&& other) -> binary_tree<T>& //O(1)
         {
             this->move_data(std::forward<binary_tree<T>>(other));
             return *this;
@@ -100,8 +222,26 @@ namespace dsa
 
     private:
         /*----------------------------------*/
+        auto get_successor(binary_tree_node<T>* del_node) -> dsa::binary_tree_node<T>*
+        {  //O(log(n)) no caso médio e O(n) no pior caso
+            auto* suc_parent = del_node;
+            auto* suc = del_node;
+            auto* cur = del_node->right;
+
+            while (cur != nullptr) {
+                suc_parent = suc;
+                suc = cur; }
+
+            if (suc != del_node->right) {
+                suc_parent->left = suc->right;
+                suc->right = del_node->right; }
+
+            return suc;
+        }
+
+        /*----------------------------------*/
         template <typename F>
-        void in_order(binary_tree_node<T>* node, F lambda)
+        void in_order(binary_tree_node<T>* node, F lambda) //O(n)
         {
             if (node) {
                 in_order(node->left, lambda);
@@ -112,7 +252,7 @@ namespace dsa
 
         /*----------------------------------*/
         template <typename F>
-        void pre_order(binary_tree_node<T>* node, F lambda)
+        void pre_order(binary_tree_node<T>* node, F lambda) //O(n)
         {
             if (node) {
                 lambda(node);
@@ -123,7 +263,7 @@ namespace dsa
 
         /*----------------------------------*/
         template <typename F>
-        void post_order(binary_tree_node<T>* node, F lambda)
+        void post_order(binary_tree_node<T>* node, F lambda) //O(n)
         {
             if (node) {
                 post_order(node->left, lambda);
@@ -133,7 +273,7 @@ namespace dsa
         }
 
         /*----------------------------------*/
-        void create_node(const T& item)
+        void create_root(const T& item) //O(1)
         {
             if (m_root == nullptr) {
                 m_size = 1;
@@ -142,7 +282,7 @@ namespace dsa
         }
 
         /*----------------------------------*/
-        void copy_data(const dsa::binary_tree<T>& other)
+        void copy_data(const dsa::binary_tree<T>& other) //O(n)
         {
             this->clear();
             other.in_order(other.m_root, [&](binary_tree_node<T>* n) {
@@ -151,7 +291,7 @@ namespace dsa
         }
 
         /*----------------------------------*/
-        void move_data(dsa::binary_tree<T>&& other)
+        void move_data(dsa::binary_tree<T>&& other) //O(1)
         {
             this->clear();
             m_root = other.m_root;
