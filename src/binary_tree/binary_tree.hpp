@@ -78,71 +78,9 @@ namespace dsa
         {
             assert(! this->empty());
 
-            auto* cur = m_root;
-            auto* parent = m_root;
-            bool is_left_child = true;
 
-            //procura pelo nó com o valor que queremos excluir
-            while (cur->data != item)
-            {
-                parent = cur;
-                if (item < cur->data) {
-                    is_left_child = true;
-                    cur = cur->left;
-                } else {
-                    is_left_child = false;
-                    cur = cur->right;
-                }
 
-                if (cur == nullptr) {
-                    return false;
-                }
-            }
-
-            if (cur->left == nullptr && cur->right == nullptr)
-            {
-                if (cur == m_root) {
-                    m_root = nullptr;
-                } else if (is_left_child) {
-                    parent->left = nullptr;
-                } else {
-                    parent->right = nullptr;
-                }
-            }
-            else if (cur->right == nullptr)
-            {
-                if (cur == m_root) {
-                    m_root = cur->left;
-                } else if (is_left_child) {
-                    parent->left = cur->left;
-                } else {
-                    parent->right = cur->left;
-                }
-            }
-            else if (cur->left == nullptr)
-            {
-                if (cur == m_root) {
-                    m_root = cur->right;
-                } else if (is_left_child) {
-                    parent->left = cur->right;
-                } else {
-                    parent->right = cur->right;
-                }
-            }
-            else
-            {
-                auto* successor = this->get_successor(cur);
-
-                if (cur == m_root) {
-                    m_root = successor;
-                } else if (is_left_child) {
-                    parent->left = successor;
-                } else {
-                    parent->right = successor;
-                }
-            }
-
-            return true;
+            return false;
         }
 
         /*----------------------------------*/
@@ -221,24 +159,6 @@ namespace dsa
         }
 
     private:
-        /*----------------------------------*/
-        auto get_successor(binary_tree_node<T>* del_node) -> dsa::binary_tree_node<T>*
-        {  //O(log(n)) no caso médio e O(n) no pior caso
-            auto* suc_parent = del_node;
-            auto* suc = del_node;
-            auto* cur = del_node->right;
-
-            while (cur != nullptr) {
-                suc_parent = suc;
-                suc = cur; }
-
-            if (suc != del_node->right) {
-                suc_parent->left = suc->right;
-                suc->right = del_node->right; }
-
-            return suc;
-        }
-
         /*----------------------------------*/
         template <typename F>
         void in_order(binary_tree_node<T>* node, F lambda) //O(n)

@@ -22,5 +22,10 @@ namespace dsa
         ~binary_tree_node() {
            //std::cout << data << " deleted!\n";
         }
+
+        /*----------------------------------*/
+        bool is_leaf() {
+            return (!left && !right);
+        }
     };
 }
