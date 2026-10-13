@@ -4,7 +4,7 @@
 #include <queue>
 using namespace std;
 
-#include "graph/graph.hpp"
+#include "graph/graph/graph.hpp"
 
 
 int main()

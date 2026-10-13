@@ -52,7 +52,6 @@ namespace dsa
         void depth_first_search(std::string_view start_node)
         {
             std::stack<graph_node*> prev_nodes;
-            std::map<std::string, int> time;
             graph_node* node = &m_nodes[start_node.data()];
             graph_node* prev = nullptr;
 
@@ -64,7 +63,7 @@ namespace dsa
             {
                 prev = prev_nodes.top();
                 node = this->next_unvisited_node(prev_nodes.top()->label);
-                time[node->label] += 1;
+
 
                 if (node == nullptr) {
                     prev_nodes.pop();
@@ -98,7 +97,6 @@ namespace dsa
                 {
                     if (!neighbor->visited)
                     {
-                        time += 1;
                         prev_node = cur_node;
                         wait_nodes.push(neighbor);
                         neighbor->visited = true;
