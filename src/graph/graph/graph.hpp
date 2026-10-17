@@ -1,43 +1,51 @@
 #pragma once
 
 #include <iostream>
-#include <cassert>
-#include <map>
+#include <unordered_map>
+#include <vector>
 #include <stack>
 #include <queue>
-
-#include "graph_node.hpp"
 
 
 namespace dsa
 {
     /*----------------------------------*/
+    template <typename data_type>
     class graph final
     {
     private:
         /*----------------------------------*/
-        std::map<std::string, graph_node> m_nodes;
+        struct node {
+            data_type data;
+            bool visited { false };
+            std::string label;
+            node() { }
+            node(std::string_view label) : label(label) { }
+        };
+
+        /*----------------------------------*/
+        std::unordered_map<std::string_view, node>  m_nodes;
+        std::unordered_map<std::string_view, std::vector<node*>> m_edges;
 
     public:
         /*----------------------------------*/
         graph() {}
 
         /*----------------------------------*/
-        void add_node(std::string_view label)
+        void add_node(std::string_view label, data_type data = {})
         {
-            graph_node g(label);
-            m_nodes[label.data()] = g;
+            auto n = node(label);
+            n.data = data;
+            m_nodes[label] = n;
         }
 
         /*----------------------------------*/
         void add_edge(std::string_view node1, std::string_view node2, bool two_way = false)
         {
-            auto& n1 = m_nodes[node1.data()].neighbors;
-            n1.push_back(&m_nodes[node2.data()]);
+            m_edges[node1].push_back(&m_nodes[node2]);
 
             if (two_way) {
-                auto& n2 = m_nodes[node2.data()].neighbors;
-                n2.push_back(&m_nodes[node1.data()]);
+                m_edges[node2].push_back(&m_nodes[node1]);
             }
         }
 
@@ -51,26 +59,26 @@ namespace dsa
         /*----------------------------------*/
         void depth_first_search(std::string_view start_node)
         {
-            std::stack<graph_node*> prev_nodes;
-            graph_node* node = &m_nodes[start_node.data()];
-            graph_node* prev = nullptr;
+            std::stack<node*> prev_nodes;
+            node* curr_node = &m_nodes[start_node];
+            node* prev_node = nullptr;
 
-            prev_nodes.push(node);
-            node->visited = true;
-            this->print_path(prev, node);
+            prev_nodes.push(curr_node);
+            curr_node->visited = true;
+            this->print_path(prev_node, curr_node);
 
             while (! prev_nodes.empty())
             {
-                prev = prev_nodes.top();
-                node = this->next_unvisited_node(prev_nodes.top()->label);
+                prev_node = prev_nodes.top();
+                curr_node = this->next_unvisited_node(prev_nodes.top()->label);
 
 
-                if (node == nullptr) {
+                if (curr_node == nullptr) {
                     prev_nodes.pop();
                 } else {
-                    node->visited = true;
-                    this->print_path(prev, node);
-                    prev_nodes.push(node);
+                    curr_node->visited = true;
+                    this->print_path(prev_node, curr_node);
+                    prev_nodes.push(curr_node);
                 }
             }
 
@@ -80,24 +88,24 @@ namespace dsa
         /*----------------------------------*/
         void breadth_first_search(std::string_view start_node)
         {
-            std::queue<graph_node*> wait_nodes;
-            graph_node* cur_node = &m_nodes[start_node.data()];
-            graph_node* prev_node = nullptr;
+            std::queue<node*> wait_nodes;
+            node* curr_node = &m_nodes[start_node];
+            node* prev_node = nullptr;
 
-            wait_nodes.push(cur_node);
-            cur_node->visited = true;
-            this->print_path(prev_node, cur_node);
+            wait_nodes.push(curr_node);
+            curr_node->visited = true;
+            this->print_path(prev_node, curr_node);
 
             while (!wait_nodes.empty())
             {
-                cur_node = wait_nodes.front();
+                curr_node = wait_nodes.front();
                 wait_nodes.pop();
 
-                for (graph_node* neighbor : cur_node->neighbors)
+                for (node* neighbor : m_edges[curr_node->label])
                 {
                     if (!neighbor->visited)
                     {
-                        prev_node = cur_node;
+                        prev_node = curr_node;
                         wait_nodes.push(neighbor);
                         neighbor->visited = true;
                         this->print_path(prev_node, neighbor);
@@ -111,12 +119,13 @@ namespace dsa
         /*----------------------------------*/
         void print_nodes()
         {
-             for (const auto& [label, node] : m_nodes)
+             for (const auto& [label, n] : m_nodes)
              {
-                 std::cout << label << ": | ";
+                 std::cout << label  << ": | Data: "
+                           << n.data << " | Neighbors: ";
 
-                 for (graph_node* n : node.neighbors) {
-                     std::cout << n->label << " | ";
+                 for (node* neigh : m_edges[label]) {
+                     std::cout << neigh->label << " | ";
                  }
 
                  std::cout << '\n';
@@ -124,20 +133,19 @@ namespace dsa
         }
 
         /*----------------------------------*/
-        void print_neighbors(std::string_view node)
+        void print_neighbors(std::string_view label)
         {
-            for (graph_node* g : m_nodes[node.data()].neighbors) {
-                std::cout << g->label << '\n';
+            for (node* neighbor : m_edges[label]) {
+                std::cout << neighbor->label << '\n';
             }
         }
 
         /*----------------------------------*/
-        auto next_unvisited_node(std::string_view label) -> graph_node*
+        auto next_unvisited_node(std::string_view label) -> node*
         {
-            auto& node = m_nodes[label.data()];
-            for (graph_node* n : node.neighbors) {
-                if (!n->visited) {
-                    return n;
+            for (node* neighbor : m_edges[label]) {
+                if (!neighbor->visited) {
+                    return neighbor;
                 }
             }
 
@@ -153,7 +161,7 @@ namespace dsa
         }
 
         /*----------------------------------*/
-        void print_path(const graph_node* prev, const graph_node* current)
+        void print_path(const node* prev, const node* current)
         {
             std::string prev_label = (prev == nullptr) ? "none" : prev->label;
             std::cout << "(" << prev_label << " => "

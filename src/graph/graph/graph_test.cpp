@@ -9,15 +9,15 @@ using namespace std;
 
 int main()
 {
-    dsa::graph g;
+    dsa::graph<int> g;
 
-    g.add_node("S");
-    g.add_node("A");
-    g.add_node("B");
-    g.add_node("C");
-    g.add_node("D");
-    g.add_node("E");
-    g.add_node("F");
+    g.add_node("S", 1);
+    g.add_node("A", 2);
+    g.add_node("B", 3);
+    g.add_node("C", 4);
+    g.add_node("D", 5);
+    g.add_node("E", 6);
+    g.add_node("F", 7);
 
     g.add_edges("S", "A", "B");
     g.add_edges("A", "S", "C", "D");
@@ -27,7 +27,13 @@ int main()
     g.add_edges("E", "B");
     g.add_edges("F", "C");
 
+    cout << "BFS: ";
+    g.breadth_first_search("S");
+    cout << "\n\nDFS: ";
     g.depth_first_search("S");
+
+    cout << "\n\nGraph nodes:\n";
+    g.print_nodes();
 
     cout << "\n\n";
     return 0;
