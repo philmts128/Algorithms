@@ -4,6 +4,7 @@ target_include_directories(graph INTERFACE ${PROJECT_SOURCE_DIR}/src)
 
 add_executable(graph_test graph/graph_test.cpp)
 target_link_libraries(graph_test PRIVATE graph)
+target_link_libraries(graph_test PRIVATE common)
 
 
 add_library(weighted_graph INTERFACE weighted_graph/weighted_graph.hpp)
