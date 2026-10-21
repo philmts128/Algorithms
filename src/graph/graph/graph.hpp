@@ -6,119 +6,166 @@
 #include <stack>
 #include <queue>
 
-#include "common/definitions.hpp"
 
-
-DSA_NAMESPACE_BEGIN
-
-/*----------------------------------*/
-class graph final
+namespace dsa
 {
-private:
     /*----------------------------------*/
-    struct node
+    template <typename data_type>
+    class graph final
     {
-        fstring label;
-        uint32_t id;
-        bool visited { false };
+    private:
+        /*----------------------------------*/
+        struct node {
+            data_type data;
+            bool visited { false };
+            std::string label;
+            node() { }
+            node(std::string_view label) : label(label) { }
+        };
 
-        node() = default;
-        node(fstring label) : label(label) { }
-    };
+        /*----------------------------------*/
+        std::unordered_map<std::string_view, node>  m_nodes;
+        std::unordered_map<std::string_view, std::vector<node*>> m_edges;
 
-    /*----------------------------------*/
-    hash_map<fstring, node>     m_nodes;
-    hash_map<uint32_t, fstring> m_labels;
-    hash_map<uint32_t, fvector<uint32_t>> m_edges;
+    public:
+        /*----------------------------------*/
+        graph() {}
 
-public:
-    /*----------------------------------*/
-    graph() = default;
-
-    /*----------------------------------*/
-    void add_node(const fstring& label)
-    {
-        node n(label);
-        n.id = m_nodes.size();
-        m_nodes[label] = n;
-        m_labels[n.id] = label;
-    }
-
-    /*----------------------------------*/
-    void add_edge(fstring node1, fstring node2, bool directed = true)
-    {
-        auto id1 = m_nodes[node1].id;
-        auto id2 = m_nodes[node2].id;
-        m_edges[id1].emplace_back(id2);
-
-        if (!directed)
-            m_edges[id2].emplace_back(id1);
-    }
-
-    /*----------------------------------*/
-    template <typename... Args>
-    void add_edges(fstring node, Args... neighbors)
-    {
-         (this->add_edge(node, neighbors, false), ...);
-    }
-
-    /*----------------------------------*/
-    void depth_first_search(fstring start_node)
-    {
-
-        this->unvisit_nodes();
-    }
-
-    /*----------------------------------*/
-    void breadth_first_search(fstring start_node)
-    {
-
-        this->unvisit_nodes();
-    }
-
-    /*----------------------------------*/
-    void print_nodes()
-    {
-        for (const auto& [id, neighbors] : m_edges)
+        /*----------------------------------*/
+        void add_node(std::string_view label, data_type data = {})
         {
-            fstring node_label = m_labels[id];
-            printf("%s: ", node_label.c_str());
+            auto n = node(label);
+            n.data = data;
+            m_nodes[label] = n;
+        }
 
-            for (uint32_t neighbor : neighbors)
+        /*----------------------------------*/
+        void add_edge(std::string_view node1, std::string_view node2, bool two_way = false)
+        {
+            m_edges[node1].push_back(&m_nodes[node2]);
+
+            if (two_way) {
+                m_edges[node2].push_back(&m_nodes[node1]);
+            }
+        }
+
+        /*----------------------------------*/
+        template <typename... Args>
+        void add_edges(std::string_view node, Args... neighbors)
+        {
+            (this->add_edge(node, neighbors, false), ...);
+        }
+
+        /*----------------------------------*/
+        void depth_first_search(std::string_view start_node)
+        {
+            std::stack<node*> prev_nodes;
+            node* curr_node = &m_nodes[start_node];
+            node* prev_node = nullptr;
+
+            prev_nodes.push(curr_node);
+            curr_node->visited = true;
+            this->print_path(prev_node, curr_node);
+
+            while (! prev_nodes.empty())
             {
-                fstring neighb_label = m_labels[neighbor];
-                printf("%s ", neighb_label.c_str());
+                prev_node = prev_nodes.top();
+                curr_node = this->next_unvisited_node(prev_nodes.top()->label);
+
+
+                if (curr_node == nullptr) {
+                    prev_nodes.pop();
+                } else {
+                    curr_node->visited = true;
+                    this->print_path(prev_node, curr_node);
+                    prev_nodes.push(curr_node);
+                }
             }
 
-            printf("\n");
+            this->unvisit_nodes();
         }
-    }
 
-    /*----------------------------------*/
-    void print_neighbors(fstring label)
-    {
-    }
+        /*----------------------------------*/
+        void breadth_first_search(std::string_view start_node)
+        {
+            std::queue<node*> wait_nodes;
+            node* curr_node = &m_nodes[start_node];
+            node* prev_node = nullptr;
 
-    /*----------------------------------*/
-    auto next_unvisited_node(fstring label) -> node*
-    {
+            wait_nodes.push(curr_node);
+            curr_node->visited = true;
+            this->print_path(prev_node, curr_node);
 
-        return nullptr;
-    }
+            while (!wait_nodes.empty())
+            {
+                curr_node = wait_nodes.front();
+                wait_nodes.pop();
 
-    /*----------------------------------*/
-    void unvisit_nodes()
-    {
-        for (auto& [_, node] : m_nodes) {
-            node.visited = false;
+                for (node* neighbor : m_edges[curr_node->label])
+                {
+                    if (!neighbor->visited)
+                    {
+                        prev_node = curr_node;
+                        wait_nodes.push(neighbor);
+                        neighbor->visited = true;
+                        this->print_path(prev_node, neighbor);
+                    }
+                }
+            }
+
+            this->unvisit_nodes();
         }
-    }
 
-    /*----------------------------------*/
-    void print_path(const node* prev, const node* current)
-    {
+        /*----------------------------------*/
+        void print_nodes()
+        {
+             for (const auto& [label, n] : m_nodes)
+             {
+                 std::cout << label  << ": | Data: "
+                           << n.data << " | Neighbors: ";
 
-    }
-};
+                 for (node* neigh : m_edges[label]) {
+                     std::cout << neigh->label << " | ";
+                 }
 
-DSA_NAMESPACE_END
+                 std::cout << '\n';
+             }
+        }
+
+        /*----------------------------------*/
+        void print_neighbors(std::string_view label)
+        {
+            for (node* neighbor : m_edges[label]) {
+                std::cout << neighbor->label << '\n';
+            }
+        }
+
+        /*----------------------------------*/
+        auto next_unvisited_node(std::string_view label) -> node*
+        {
+            for (node* neighbor : m_edges[label]) {
+                if (!neighbor->visited) {
+                    return neighbor;
+                }
+            }
+
+            return nullptr;
+        }
+
+        /*----------------------------------*/
+        void unvisit_nodes()
+        {
+            for (auto& [label, node] : m_nodes) {
+                node.visited = false;
+            }
+        }
+
+        /*----------------------------------*/
+        void print_path(const node* prev, const node* current)
+        {
+            std::string prev_label = (prev == nullptr) ? "none" : prev->label;
+            std::cout << "(" << prev_label << " => "
+                      << current->label <<  ") ";
+        }
+    };
+}
