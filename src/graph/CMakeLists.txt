@@ -1,5 +1,4 @@
 add_library(graph INTERFACE graph/graph.hpp)
-
 target_include_directories(graph INTERFACE ${PROJECT_SOURCE_DIR}/src)
 
 add_executable(graph_test graph/graph_test.cpp)
