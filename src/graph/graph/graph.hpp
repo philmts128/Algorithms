@@ -33,7 +33,7 @@ private:
 
 private:
     /*-------------------------------------*/
-    hash_map<uint32_t, node_t> m_nodes;
+    hash_map<u32, node_t> m_nodes;
     hash_map<fstring, u32> m_labels;
 
 public:
@@ -91,6 +91,36 @@ public:
                 m_nodes[node].visited = true;
                 printf("%s ", m_nodes[prev_nodes.top()].label.c_str());
             }
+        }
+
+        this->unvisit_nodes();
+    }
+
+    /*-------------------------------------*/
+    void breadth_first_search(fstr_view start_node)
+    {
+        u32 start_id = m_labels[start_node.data()];
+        fqueue<u32> prev_nodes;
+
+        prev_nodes.push(start_id);
+        m_nodes[start_id].visited = true;
+        printf("(none -> %s) ", m_nodes[prev_nodes.front()].label.c_str());
+
+        while (! prev_nodes.empty())
+        {
+            node_t& prev = m_nodes[prev_nodes.front()];
+
+            for (u32 nid : prev.neighbors)
+            {
+                if (!m_nodes[nid].visited) {
+                    prev_nodes.push(nid);
+                    m_nodes[nid].visited = true;
+                    printf("(%s -> %s) ", prev.label.c_str(),
+                           m_nodes[nid].label.c_str());
+                }
+            }
+
+            prev_nodes.pop();
         }
 
         this->unvisit_nodes();

@@ -20,7 +20,7 @@ int main()
     g.add_dir_edges("C", "D");
     g.add_dir_edges("D", "A");
 
-    g.depth_first_search("A");
+    g.breadth_first_search("A");
 
     cout << "\n\n";
     return 0;
