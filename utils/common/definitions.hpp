@@ -15,6 +15,8 @@ using u16 = std::uint16_t;
 using u32 = std::uint32_t;
 using u64 = std::uint64_t;
 
+using fsize = std::size_t;
+
 using fstring = std::string;
 using fstr_view = std::string_view;
 

@@ -1,31 +1,24 @@
 #pragma once
 
-#include <iostream>
+#include "common/definitions.hpp"
 
 
-namespace dsa
+DSA_NAMESPACE_BEGIN
+
+/*-----------------------------*/
+template <typename T>
+struct binary_tree_node final
 {
-    /*----------------------------------*/
-    template <typename T>
-    struct binary_tree_node
-    {
-        /*----------------------------------*/
-        binary_tree_node<T>* left  { nullptr };
-        binary_tree_node<T>* right { nullptr };
-        T data;
+    /*-----------------------------*/
+    binary_tree_node<T>* left  { nullptr };
+    binary_tree_node<T>* right { nullptr };
+    T data;
 
-        /*----------------------------------*/
-        binary_tree_node(const T& data)
-            : data(data) {}
+    /*-----------------------------*/
+    binary_tree_node() = default;
 
-        /*----------------------------------*/
-        ~binary_tree_node() {
-           //std::cout << data << " deleted!\n";
-        }
+    /*------------------------------*/
+    binary_tree_node(const T& data) : data(data) {}
+ };
 
-        /*----------------------------------*/
-        bool is_leaf() {
-            return (!left && !right);
-        }
-    };
-}
+DSA_NAMESPACE_END

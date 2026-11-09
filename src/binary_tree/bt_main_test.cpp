@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <string>
 using namespace std;
 
@@ -7,18 +8,15 @@ using namespace std;
 
 int main()
 {
-    dsa::binary_tree<string> langs;
-    langs.insert("C");
-    langs.insert("C++");
-    langs.insert("Python");
-    langs.insert("Java");
-    langs.insert("C#");
+    dsa::binary_tree<int> tree;
 
-    cout << "min: " << langs.min() << "\n";
-    cout << "max: " << langs.max() << "\n\n";
+    for (int i = 100; i >= 0; --i)
+        tree.insert(i);
 
-    langs.remove("Python");
-    langs.print('\n');
+    auto t2 = tree;
+    t2.print();
+
+    cout << boolalpha << t2.exists(999);
 
     cout << "\n\n";
     return 0;
